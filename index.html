@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>截图放大镜 · 图片聚焦工具</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:21px;height:21px">
+          <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/>
+        </svg>
+      </div>
+      <div><h1>截图放大镜</h1></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">图片来源</div>
+      <div class="source-row">
+        <button class="btn btn-primary" id="pickBtn">
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M20 16v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/></svg>
+          选择图片
+        </button>
+        <button class="btn btn-ghost" id="pasteBtn">剪贴板</button>
+      </div>
+      <p class="hint">也可以按 <kbd>Ctrl</kbd> + <kbd>V</kbd> 直接粘贴，或将图片拖到右侧区域。</p>
+      <div class="file-info" id="fileInfo">尚未载入图片</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">放大镜</div>
+      <div class="field">
+        <div class="field-head"><label for="size">放大镜大小</label><span id="sizeVal">50%</span></div>
+        <input type="range" id="size" min="8" max="100" step="1" value="50" />
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="zoom">放大倍数</label><span id="zoomVal">1.2×</span></div>
+        <input type="range" id="zoom" min="1.2" max="6" step="0.1" value="1.2" />
+      </div>
+      <div class="field">
+        <div class="field-head"><label>镜片形状</label></div>
+        <div class="seg">
+          <button data-shape="circle" class="active">圆形</button>
+          <button data-shape="round">圆角方形</button>
+          <button data-shape="hbar">横版长条</button>
+          <button data-shape="vbar">竖版长条</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">背景与镜框</div>
+      <div class="field">
+        <div class="field-head"><label for="blur">背景虚化程度</label><span id="blurVal">10</span></div>
+        <input type="range" id="blur" min="0" max="30" step="1" value="10" />
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="tint">背景虚化颜色</label></div>
+        <div class="color-row">
+          <input type="color" id="tint" value="#0f172a" />
+          <span class="color-code" id="tintCode">#0F172A</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="tintOpacity">颜色浓度</label><span id="tintOpacityVal">22%</span></div>
+        <input type="range" id="tintOpacity" min="0" max="100" step="1" value="22" />
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="borderColor">镜框颜色</label></div>
+        <div class="color-row">
+          <input type="color" id="borderColor" value="#ffffff" />
+          <span class="color-code" id="borderCode">#FFFFFF</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="borderWidth">镜框粗细</label><span id="borderWidthVal">10</span></div>
+        <input type="range" id="borderWidth" min="0" max="50" step="1" value="10" />
+      </div>
+    </div>
+
+    <button class="btn btn-ghost wide" id="resetBtn">恢复默认设置</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="status"><span class="dot" id="dot"></span><span id="statusText">等待载入图片</span></div>
+      <button class="btn btn-primary" id="exportBtn">
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12m0 0 5-5m-5 5-5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        导出图片
+      </button>
+    </header>
+    <section class="stage" id="stage">
+      <div class="empty" id="empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="30" height="30"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/><path d="M7.5 10.5h6M10.5 7.5v6"/></svg>
+        </div>
+        <h2>载入一张截图开始</h2>
+        <p>点击左上角「选择图片」，或直接粘贴剪贴板中的截图。</p>
+      </div>
+      <canvas id="canvas" hidden></canvas>
+      <div class="drag-overlay">松开鼠标以载入图片</div>
+    </section>
+    <footer class="footer">
+      <span class="notice">本站内容仅供学习和交流，非商业用途</span>
+      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2025187466号</a>
+      <a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33030402001483" target="_blank" rel="noopener noreferrer"><img class="beian-icon" src="https://www.937788.xyz/gonganbeian.png" alt="" />浙公网安备33030402001483号</a>
+    </footer>
+  </main>
+</div>
+<input type="file" id="fileInput" accept="image/*" hidden />
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
